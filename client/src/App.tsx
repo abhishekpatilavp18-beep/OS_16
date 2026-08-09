@@ -1,122 +1,183 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+
+import "./App.css";
+
+import DesktopIcon from "./components/DesktopIcon/DesktopIcon";
+import Taskbar from "./components/Taskbar/Taskbar";
+import Window from "./components/Window/Window";
+
+type OpenWindow = {
+  id: string;
+  title: string;
+  minimized: boolean;
+  zIndex: number;
+};
+
+const applications = [
+  {
+    id: "projects",
+    name: "Projects",
+    icon: "📁",
+  },
+  {
+    id: "about",
+    name: "About",
+    icon: "👤",
+  },
+  {
+    id: "resume",
+    name: "Resume",
+    icon: "📄",
+  },
+  {
+    id: "ai",
+    name: "AbhiAI",
+    icon: "🤖",
+  },
+  {
+    id: "terminal",
+    name: "Terminal",
+    icon: "💻",
+  },
+  {
+    id: "achievements",
+    name: "Achievements",
+    icon: "🏆",
+  },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [windows, setWindows] = useState<OpenWindow[]>([]);
+
+  const openApplication = (id: string, name: string) => {
+    const existingWindow = windows.find((window) => window.id === id);
+
+    if (existingWindow) {
+      focusWindow(id);
+      return;
+    }
+
+    const newWindow: OpenWindow = {
+      id,
+      title: name,
+      minimized: false,
+      zIndex: windows.length + 1,
+    };
+
+    setWindows((current) => [...current, newWindow]);
+  };
+
+  const closeWindow = (id: string) => {
+    setWindows((current) =>
+      current.filter((window) => window.id !== id)
+    );
+  };
+
+  const minimizeWindow = (id: string) => {
+    setWindows((current) =>
+      current.map((window) =>
+        window.id === id
+          ? { ...window, minimized: true }
+          : window
+      )
+    );
+  };
+
+  function focusWindow(id: string) {
+    setWindows((current) => {
+      const highestZIndex = Math.max(
+        0,
+        ...current.map((window) => window.zIndex)
+      );
+
+      return current.map((window) =>
+        window.id === id
+          ? {
+              ...window,
+              minimized: false,
+              zIndex: highestZIndex + 1,
+            }
+          : window
+      );
+    });
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="desktop">
+      <div className="desktop-brand">
+        <h1>AbhishekOS</h1>
+        <p>Personal workspace</p>
+      </div>
 
-      <div className="ticks"></div>
+      <div className="desktop-icons">
+        {applications.map((app) => (
+          <DesktopIcon
+            key={app.id}
+            name={app.name}
+            icon={app.icon}
+            onDoubleClick={() =>
+              openApplication(app.id, app.name)
+            }
+          />
+        ))}
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {windows.map((window) => {
+        if (window.minimized) {
+          return null;
+        }
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        return (
+          <Window
+            key={window.id}
+            title={window.title}
+            zIndex={window.zIndex}
+            onClose={() => closeWindow(window.id)}
+            onMinimize={() => minimizeWindow(window.id)}
+            onFocus={() => focusWindow(window.id)}
+          >
+            <h2>{window.title}</h2>
+            <p>
+              This application is currently being built.
+            </p>
+          </Window>
+        );
+      })}
+
+           <Taskbar
+        apps={applications.map((app) => {
+          const window = windows.find(
+            (window) => window.id === app.id
+          );
+
+          return {
+            id: app.id,
+            name: app.name,
+            icon: app.icon,
+            isOpen: Boolean(window),
+            minimized: window?.minimized ?? false,
+          };
+        })}
+        onAppClick={(id) => {
+          const app = applications.find(
+            (application) => application.id === id
+          );
+
+          const window = windows.find(
+            (window) => window.id === id
+          );
+
+          if (!app) return;
+
+          if (window) {
+            focusWindow(id);
+          } else {
+            openApplication(id, app.name);
+          }
+        }}
+      />
+    </main>
+  );
 }
 
-export default App
+export default App;

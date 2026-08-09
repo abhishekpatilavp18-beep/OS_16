@@ -6,6 +6,7 @@ import DesktopIcon from "./components/DesktopIcon/DesktopIcon";
 import Taskbar from "./components/Taskbar/Taskbar";
 import Window from "./components/Window/Window";
 import StartMenu from "./components/StartMenu/StartMenu";
+import Projects from "./applications/Projects/Projects";
 
 type OpenWindow = {
   id: string;
@@ -86,7 +87,9 @@ function App() {
 
   const closeWindow = (id: string) => {
     setWindows((current) =>
-      current.filter((window) => window.id !== id)
+      current.filter(
+        (window) => window.id !== id
+      )
     );
   };
 
@@ -107,7 +110,9 @@ function App() {
     setWindows((current) => {
       const highestZIndex = Math.max(
         0,
-        ...current.map((window) => window.zIndex)
+        ...current.map(
+          (window) => window.zIndex
+        )
       );
 
       return current.map((window) =>
@@ -142,98 +147,112 @@ function App() {
 
   return (
     <main className="desktop">
-      <div className="desktop-brand">
-        <h1>AbhishekOS</h1>
-        <p>Personal workspace</p>
-      </div>
+      <div className="desktop-background">
+        <div className="desktop-title">
+          <h1>AbhishekOS</h1>
+          <p>Personal workspace</p>
+        </div>
 
-      <div className="desktop-icons">
-        {applications.map((app) => (
-          <DesktopIcon
-            key={app.id}
-            name={app.name}
-            icon={app.icon}
-            onDoubleClick={() =>
-              openApplication(app.id, app.name)
+        <div className="desktop-icons">
+          {applications.map((app) => (
+            <DesktopIcon
+              key={app.id}
+              name={app.name}
+              icon={app.icon}
+              onDoubleClick={() =>
+                openApplication(
+                  app.id,
+                  app.name
+                )
+              }
+            />
+          ))}
+        </div>
+
+        {windows.map((window) => {
+          if (window.minimized) {
+            return null;
+          }
+
+          return (
+            <Window
+              key={window.id}
+              title={window.title}
+              zIndex={window.zIndex}
+              onClose={() =>
+                closeWindow(window.id)
+              }
+              onMinimize={() =>
+                minimizeWindow(window.id)
+              }
+              onFocus={() =>
+                focusWindow(window.id)
+              }
+            >
+              {window.id === "projects" ? (
+                <Projects />
+              ) : (
+                <>
+                  <h2>{window.title}</h2>
+
+                  <p>
+                    This application is
+                    currently being built.
+                  </p>
+                </>
+              )}
+            </Window>
+          );
+        })}
+
+        {startMenuOpen && (
+          <StartMenu
+            applications={applications}
+            onOpenApplication={(id) => {
+              const app = applications.find(
+                (application) =>
+                  application.id === id
+              );
+
+              if (app) {
+                openApplication(
+                  app.id,
+                  app.name
+                );
+
+                setStartMenuOpen(false);
+              }
+            }}
+            onClose={() =>
+              setStartMenuOpen(false)
             }
           />
-        ))}
-      </div>
+        )}
 
-      {windows.map((window) => {
-        if (window.minimized) {
-          return null;
-        }
-
-        return (
-          <Window
-            key={window.id}
-            title={window.title}
-            zIndex={window.zIndex}
-            onClose={() =>
-              closeWindow(window.id)
-            }
-            onMinimize={() =>
-              minimizeWindow(window.id)
-            }
-            onFocus={() =>
-              focusWindow(window.id)
-            }
-          >
-            <h2>{window.title}</h2>
-
-            <p>
-              This application is currently being
-              built.
-            </p>
-          </Window>
-        );
-      })}
-
-      {startMenuOpen && (
-        <StartMenu
-          applications={applications}
-          onOpenApplication={(id) => {
-            const app = applications.find(
-              (application) =>
-                application.id === id
+        <Taskbar
+          apps={applications.map((app) => {
+            const window = windows.find(
+              (window) =>
+                window.id === app.id
             );
 
-            if (app) {
-              openApplication(
-                app.id,
-                app.name
-              );
-            }
-          }}
-          onClose={() =>
-            setStartMenuOpen(false)
+            return {
+              id: app.id,
+              name: app.name,
+              icon: app.icon,
+              isOpen: Boolean(window),
+              minimized:
+                window?.minimized ?? false,
+            };
+          })}
+          onAppClick={handleTaskbarAppClick}
+          onStartClick={() =>
+            setStartMenuOpen(
+              (current) => !current
+            )
           }
         />
-      )}
-
-      <Taskbar
-        apps={applications.map((app) => {
-          const window = windows.find(
-            (window) => window.id === app.id
-          );
-
-          return {
-            id: app.id,
-            name: app.name,
-            icon: app.icon,
-            isOpen: Boolean(window),
-            minimized:
-              window?.minimized ?? false,
-          };
-        })}
-        onAppClick={handleTaskbarAppClick}
-        onStartClick={() =>
-          setStartMenuOpen(
-            (current) => !current
-          )
-        }
-      />
+      </div>
     </main>
   );
 }

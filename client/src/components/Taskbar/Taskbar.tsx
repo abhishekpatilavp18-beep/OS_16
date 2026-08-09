@@ -11,9 +11,14 @@ type TaskbarApp = {
 type TaskbarProps = {
   apps: TaskbarApp[];
   onAppClick: (id: string) => void;
+  onStartClick: () => void;
 };
 
-function Taskbar({ apps, onAppClick }: TaskbarProps) {
+function Taskbar({
+  apps,
+  onAppClick,
+  onStartClick,
+}: TaskbarProps) {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -31,13 +36,16 @@ function Taskbar({ apps, onAppClick }: TaskbarProps) {
 
   return (
     <footer className="taskbar">
+      {/* Start Button */}
       <button
         className="start-button"
         aria-label="Open application menu"
+        onClick={onStartClick}
       >
         <span className="start-dot"></span>
       </button>
 
+      {/* Taskbar Applications */}
       <div className="taskbar-apps">
         {apps.map((app) => (
           <button
@@ -50,6 +58,7 @@ function Taskbar({ apps, onAppClick }: TaskbarProps) {
           >
             <span>{app.icon}</span>
 
+            {/* Running application indicator */}
             {app.isOpen && (
               <span className="running-indicator"></span>
             )}
@@ -57,6 +66,7 @@ function Taskbar({ apps, onAppClick }: TaskbarProps) {
         ))}
       </div>
 
+      {/* System Tray */}
       <div className="system-tray">
         <span>Wi-Fi</span>
         <span>{formattedTime}</span>

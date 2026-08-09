@@ -5,6 +5,7 @@ import "./App.css";
 import DesktopIcon from "./components/DesktopIcon/DesktopIcon";
 import Taskbar from "./components/Taskbar/Taskbar";
 import Window from "./components/Window/Window";
+import StartMenu from "./components/StartMenu/StartMenu";
 
 type OpenWindow = {
   id: string;
@@ -49,22 +50,38 @@ const applications = [
 function App() {
   const [windows, setWindows] = useState<OpenWindow[]>([]);
 
-  const openApplication = (id: string, name: string) => {
-    const existingWindow = windows.find((window) => window.id === id);
+  const [startMenuOpen, setStartMenuOpen] =
+    useState(false);
+
+  const openApplication = (
+    id: string,
+    name: string
+  ) => {
+    const existingWindow = windows.find(
+      (window) => window.id === id
+    );
 
     if (existingWindow) {
       focusWindow(id);
       return;
     }
 
+    const highestZIndex = Math.max(
+      0,
+      ...windows.map((window) => window.zIndex)
+    );
+
     const newWindow: OpenWindow = {
       id,
       title: name,
       minimized: false,
-      zIndex: windows.length + 1,
+      zIndex: highestZIndex + 1,
     };
 
-    setWindows((current) => [...current, newWindow]);
+    setWindows((current) => [
+      ...current,
+      newWindow,
+    ]);
   };
 
   const closeWindow = (id: string) => {
@@ -77,7 +94,10 @@ function App() {
     setWindows((current) =>
       current.map((window) =>
         window.id === id
-          ? { ...window, minimized: true }
+          ? {
+              ...window,
+              minimized: true,
+            }
           : window
       )
     );
@@ -101,6 +121,24 @@ function App() {
       );
     });
   }
+
+  const handleTaskbarAppClick = (id: string) => {
+    const app = applications.find(
+      (application) => application.id === id
+    );
+
+    if (!app) return;
+
+    const window = windows.find(
+      (window) => window.id === id
+    );
+
+    if (window) {
+      focusWindow(id);
+    } else {
+      openApplication(id, app.name);
+    }
+  };
 
   return (
     <main className="desktop">
@@ -132,19 +170,49 @@ function App() {
             key={window.id}
             title={window.title}
             zIndex={window.zIndex}
-            onClose={() => closeWindow(window.id)}
-            onMinimize={() => minimizeWindow(window.id)}
-            onFocus={() => focusWindow(window.id)}
+            onClose={() =>
+              closeWindow(window.id)
+            }
+            onMinimize={() =>
+              minimizeWindow(window.id)
+            }
+            onFocus={() =>
+              focusWindow(window.id)
+            }
           >
             <h2>{window.title}</h2>
+
             <p>
-              This application is currently being built.
+              This application is currently being
+              built.
             </p>
           </Window>
         );
       })}
 
-           <Taskbar
+      {startMenuOpen && (
+        <StartMenu
+          applications={applications}
+          onOpenApplication={(id) => {
+            const app = applications.find(
+              (application) =>
+                application.id === id
+            );
+
+            if (app) {
+              openApplication(
+                app.id,
+                app.name
+              );
+            }
+          }}
+          onClose={() =>
+            setStartMenuOpen(false)
+          }
+        />
+      )}
+
+      <Taskbar
         apps={applications.map((app) => {
           const window = windows.find(
             (window) => window.id === app.id
@@ -155,26 +223,16 @@ function App() {
             name: app.name,
             icon: app.icon,
             isOpen: Boolean(window),
-            minimized: window?.minimized ?? false,
+            minimized:
+              window?.minimized ?? false,
           };
         })}
-        onAppClick={(id) => {
-          const app = applications.find(
-            (application) => application.id === id
-          );
-
-          const window = windows.find(
-            (window) => window.id === id
-          );
-
-          if (!app) return;
-
-          if (window) {
-            focusWindow(id);
-          } else {
-            openApplication(id, app.name);
-          }
-        }}
+        onAppClick={handleTaskbarAppClick}
+        onStartClick={() =>
+          setStartMenuOpen(
+            (current) => !current
+          )
+        }
       />
     </main>
   );

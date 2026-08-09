@@ -272,3 +272,116 @@
 .taskbar-app.active {
   background: rgba(31, 41, 55, 0.08);
 }
+.start-menu {
+  position: absolute;
+
+  left: 14px;
+  bottom: 64px;
+
+  width: 420px;
+  min-height: 360px;
+
+  padding: 18px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  border-radius: 12px;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.14),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+
+  backdrop-filter: blur(16px);
+
+  z-index: 1000;
+}
+
+.start-menu-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 40px;
+
+  padding: 0 12px;
+
+  background: #f3f4f6;
+
+  border-radius: 7px;
+}
+
+.start-menu-search span {
+  font-size: 20px;
+  color: #6b7280;
+}
+
+.start-menu-search input {
+  width: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 13px;
+  color: #374151;
+}
+
+.start-menu-title {
+  margin: 22px 4px 12px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #6b7280;
+}
+
+.start-menu-apps {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 6px;
+}
+
+.start-menu-app {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #374151;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.start-menu-app:hover {
+  background: #f3f4f6;
+}
+
+.start-menu-icon {
+  width: 32px;
+
+  font-size: 24px;
+
+  text-align: center;
+}
+.no-search-results {
+  padding: 30px 10px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #9ca3af;
+}

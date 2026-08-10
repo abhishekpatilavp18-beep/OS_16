@@ -1,6 +1,13 @@
 import "./ProjectDetails.css";
 
-import type { Project } from "../../../data/projects";
+type Project = {
+  id: string;
+  title: string;
+  description: string;
+  technologies: string[];
+  github?: string;
+  live?: string;
+};
 
 type ProjectDetailsProps = {
   project: Project;
@@ -15,16 +22,16 @@ function ProjectDetails({
     <div className="project-details">
       <button
         type="button"
-        className="project-back-button"
+        className="project-details-back"
         onClick={onBack}
       >
-        ← Back to projects
+        ← Back to Projects
       </button>
 
       <div className="project-details-header">
-        <div className="project-details-icon">
+        <span className="project-details-folder">
           📁
-        </div>
+        </span>
 
         <h2>{project.title}</h2>
 
@@ -35,11 +42,13 @@ function ProjectDetails({
         <h3>Technologies</h3>
 
         <div className="project-details-technologies">
-          {project.technologies.map((technology) => (
-            <span key={technology}>
-              {technology}
-            </span>
-          ))}
+          {project.technologies.map(
+            (technology) => (
+              <span key={technology}>
+                {technology}
+              </span>
+            )
+          )}
         </div>
       </section>
 
@@ -67,11 +76,12 @@ function ProjectDetails({
             </a>
           )}
 
-          {!project.github && !project.live && (
-            <span className="no-project-links">
-              Links will be added soon.
-            </span>
-          )}
+          {!project.github &&
+            !project.live && (
+              <span className="no-project-links">
+                Links will be added soon.
+              </span>
+            )}
         </div>
       </section>
     </div>

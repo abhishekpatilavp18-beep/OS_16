@@ -1,14 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "./Projects.css";
 
-import { projects } from "../../data/projects";
-
 import ProjectDetails from "./ProjectDetails/ProjectDetails";
 
+type Project = {
+  id: string;
+  title: string;
+  description: string;
+  technologies: string[];
+  github?: string;
+  live?: string;
+};
+
+type ProjectsResponse = {
+  success: boolean;
+  projects: Project[];
+};
+
 function Projects() {
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] =
     useState<string | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          "http://localhost:5000/api/projects"
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch projects (${response.status})`
+          );
+        }
+
+        const data: ProjectsResponse =
+          await response.json();
+
+        if (!data.success) {
+          throw new Error("Failed to load projects");
+        }
+
+        setProjects(data.projects);
+      } catch (err) {
+        console.error("Failed to load projects:", err);
+
+        setError(
+          "Unable to load projects right now."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const selectedProject = projects.find(
     (project) => project.id === selectedProjectId
@@ -18,7 +72,9 @@ function Projects() {
     return (
       <ProjectDetails
         project={selectedProject}
-        onBack={() => setSelectedProjectId(null)}
+        onBack={() =>
+          setSelectedProjectId(null)
+        }
       />
     );
   }
@@ -36,11 +92,21 @@ function Projects() {
 
         <span className="project-count">
           {projects.length}{" "}
-          {projects.length === 1 ? "project" : "projects"}
+          {projects.length === 1
+            ? "project"
+            : "projects"}
         </span>
       </div>
 
-      {projects.length === 0 ? (
+      {loading ? (
+        <div className="no-projects">
+          <p>Loading projects...</p>
+        </div>
+      ) : error ? (
+        <div className="no-projects">
+          <p>{error}</p>
+        </div>
+      ) : projects.length === 0 ? (
         <div className="no-projects">
           <p>No projects added yet.</p>
         </div>
@@ -62,11 +128,13 @@ function Projects() {
               <p>{project.description}</p>
 
               <div className="project-technologies">
-                {project.technologies.map((technology) => (
-                  <span key={technology}>
-                    {technology}
-                  </span>
-                ))}
+                {project.technologies.map(
+                  (technology) => (
+                    <span key={technology}>
+                      {technology}
+                    </span>
+                  )
+                )}
               </div>
 
               <div className="project-links">
@@ -74,7 +142,9 @@ function Projects() {
                   type="button"
                   className="project-view-button"
                   onClick={() =>
-                    setSelectedProjectId(project.id)
+                    setSelectedProjectId(
+                      project.id
+                    )
                   }
                 >
                   View Project →
